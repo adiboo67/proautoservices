@@ -1,0 +1,27 @@
+# Enable rewrite engine
+RewriteEngine On
+
+# Allow access to static files
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+# Set default permissions
+Options -Indexes +FollowSymLinks
+Allow from all
+
+# Handle Next.js routes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /index.html [L,QSA]
+
+# Set correct MIME types
+AddType application/javascript .js
+AddType text/css .css
+AddType image/svg+xml .svg
+
+# Enable CORS
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header set Access-Control-Allow-Headers "Content-Type, Authorization"

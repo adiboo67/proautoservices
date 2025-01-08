@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+}
+
+/* Styles pour le calendrier */
+.fc .fc-highlight {
+  background-color: #e5e7eb !important;
+  opacity: 1 !important;
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+  background-color: #dbeafe !important;
+}
+
+.fc .fc-daygrid-day.fc-day-selected {
+  background-color: #bfdbfe !important;
+}
+
+.fc .fc-daygrid-day:hover {
+  background-color: #f3f4f6 !important;
+}
