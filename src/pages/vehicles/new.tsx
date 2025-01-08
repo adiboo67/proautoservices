@@ -115,22 +115,16 @@ export default function NewVehicle() {
                     {errors.brand_model && <span className="text-red-500 text-sm">Ce champ est requis</span>}
                   </div>
 
-                  <div>
+                  <div className="sm:col-span-2">
                     <label htmlFor="work_type" className="block text-sm font-medium text-gray-700">
-                      Type de travail
+                      Type de travaux
                     </label>
-                    <select
+                    <textarea
                       id="work_type"
+                      rows={8}
                       {...register('work_type', { required: true })}
-                      className="mt-1 block w-full border-2 border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    >
-                      <option value="Vidange">Vidange</option>
-                      <option value="Réparation">Réparation</option>
-                      <option value="Dépannage">Dépannage</option>
-                      <option value="Diagnostic">Diagnostic</option>
-                      <option value="Entretien">Entretien</option>
-                      <option value="Autres">Autres</option>
-                    </select>
+                      className="mt-1 block w-full border-2 border-gray-300 rounded-md shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm min-h-[200px]"
+                    />
                     {errors.work_type && <span className="text-red-500 text-sm">Ce champ est requis</span>}
                   </div>
 
@@ -161,6 +155,18 @@ export default function NewVehicle() {
                       <option value="Terminé">Terminé</option>
                     </select>
                     {errors.status && <span className="text-red-500 text-sm">Ce champ est requis</span>}
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label htmlFor="parts_supplies" className="block text-sm font-medium text-gray-700">
+                      Pièces et fournitures
+                    </label>
+                    <textarea
+                      id="parts_supplies"
+                      rows={8}
+                      {...register('parts_supplies')}
+                      className="mt-1 block w-full border-2 border-gray-300 rounded-md shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm min-h-[200px]"
+                    />
                   </div>
                 </div>
 

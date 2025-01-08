@@ -29,7 +29,7 @@ interface VehicleFormData {
 
 export default function VehicleForm({ vehicle, onClose, onSuccess }: VehicleFormProps) {
   const [loading, setLoading] = useState(false)
-  const [signature, setSignature] = useState<string | null>('')
+  const [signature, setSignature] = useState<string | null>(vehicle?.client_signature || null)
   const [mechanics, setMechanics] = useState<any[]>([])
   const [selectedMechanics, setSelectedMechanics] = useState<string[]>(
     vehicle?.mechanics?.map((id: number) => id.toString()) || []
@@ -93,10 +93,31 @@ export default function VehicleForm({ vehicle, onClose, onSuccess }: VehicleForm
     setPhotos(newPhotos)
   }
 
-  const handlePhotoDelete = (index: number) => {
-    const newPhotos = [...photos]
-    newPhotos[index] = ''
-    setPhotos(newPhotos)
+  const handlePhotoDelete = async (index: number) => {
+    try {
+      const photoUrl = photos[index];
+      if (photoUrl) {
+        // Supprimer le fichier du storage si nécessaire
+        const photoPath = photoUrl.split('/').pop();
+        if (photoPath) {
+          const { error: deleteError } = await supabase.storage
+            .from('vehicle-photos')
+            .remove([photoPath]);
+          
+          if (deleteError) {
+            console.error('Error deleting photo from storage:', deleteError);
+            throw deleteError;
+          }
+        }
+      }
+      
+      const newPhotos = [...photos];
+      newPhotos[index] = '';
+      setPhotos(newPhotos);
+    } catch (error) {
+      console.error('Error deleting photo:', error);
+      toast.error('Erreur lors de la suppression de la photo');
+    }
   }
 
   const handleMechanicsChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -110,7 +131,6 @@ export default function VehicleForm({ vehicle, onClose, onSuccess }: VehicleForm
       
       // Convertir les mécaniciens en nombres
       const mechanicIds = selectedMechanics.map(id => parseInt(id, 10));
-      console.log('Mechanic IDs before save:', mechanicIds);
       
       // Créer l'objet de données à sauvegarder
       const vehicleData = {
@@ -126,16 +146,14 @@ export default function VehicleForm({ vehicle, onClose, onSuccess }: VehicleForm
         observations: data.observations,
         registration_number: data.registration_number,
         status: data.status,
-        mechanics: mechanicIds,  // Utiliser exactement le même nom que dans la base de données
+        mechanics: mechanicIds,
         client_signature: signature,
-        photos: photos.filter(Boolean)
+        photos: photos.filter(photo => photo && photo.trim() !== '')
       };
-
-      console.log('Vehicle data before cleanup:', vehicleData);
 
       // Retirer les champs undefined ou vides
       const cleanData = Object.fromEntries(
-        Object.entries(vehicleData).filter(([key, value]) => {
+        Object.entries(vehicleData).filter(([_, value]) => {
           if (Array.isArray(value)) {
             return value.length > 0;
           }
@@ -143,14 +161,13 @@ export default function VehicleForm({ vehicle, onClose, onSuccess }: VehicleForm
         })
       );
 
-      console.log('Clean data before save:', cleanData);
-
-      // Log de la requête exacte
-      console.log('Update query:', {
-        table: 'vehicles',
-        data: cleanData,
-        id: vehicle?.id
-      });
+      // Si la signature ou les photos sont explicitement supprimées, les inclure comme null
+      if (!signature) {
+        cleanData.client_signature = null;
+      }
+      if (photos.every(photo => !photo || photo.trim() === '')) {
+        cleanData.photos = [];
+      }
 
       const { data: updateData, error: updateError } = vehicle?.id
         ? await supabase
@@ -167,8 +184,6 @@ export default function VehicleForm({ vehicle, onClose, onSuccess }: VehicleForm
         throw updateError;
       }
 
-      console.log('Update response:', updateData);
-      
       toast.success(
         vehicle
           ? 'Véhicule modifié avec succès'

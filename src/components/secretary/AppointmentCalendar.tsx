@@ -10,8 +10,8 @@ import AppointmentForm from './AppointmentForm'
 interface Appointment {
   id: string
   title: string
-  start: string
-  end: string
+  start_time: string
+  end_time: string
   client_name: string
   phone: string
   vehicle: string
@@ -73,36 +73,71 @@ export default function AppointmentCalendar() {
 
   const handleEventDrop = async (arg: any) => {
     try {
-      const appointment = appointments.find(a => a.id === arg.event.extendedProps.id)
-      if (!appointment) return
+      const appointment = appointments.find(a => a.id === arg.event.extendedProps.id);
+      if (!appointment) return;
 
-      // Récupérer l'heure d'origine
-      const originalTime = new Date(appointment.start).toTimeString().substring(0, 8)
-      
-      // Créer la nouvelle date de début avec l'heure d'origine
-      const newStartDate = new Date(arg.event.start)
-      const [hours, minutes, seconds] = originalTime.split(':')
-      newStartDate.setHours(parseInt(hours), parseInt(minutes), parseInt(seconds))
-      
-      // Calculer la nouvelle date de fin (1 heure après le début)
-      const newEndDate = new Date(newStartDate.getTime() + 60 * 60 * 1000)
+      // Récupérer la durée de l'événement original en minutes
+      const originalStart = new Date(appointment.start_time);
+      const originalEnd = new Date(appointment.end_time);
+      const durationInMinutes = (originalEnd.getTime() - originalStart.getTime()) / (1000 * 60);
 
-      const { error } = await supabase
+      // Créer la nouvelle date de début
+      const newStartDate = new Date(arg.event.start);
+
+      // Conserver l'heure d'origine
+      newStartDate.setHours(
+        originalStart.getHours(),
+        originalStart.getMinutes(),
+        0,
+        0
+      );
+
+      // Calculer la nouvelle date de fin en conservant la durée originale
+      const newEndDate = new Date(newStartDate.getTime() + durationInMinutes * 60 * 1000);
+
+      // S'assurer que les dates sont au format UTC
+      const startTimeUTC = newStartDate.toISOString();
+      const endTimeUTC = newEndDate.toISOString();
+
+      console.log('Updating appointment:', {
+        id: appointment.id,
+        original: {
+          start_time: appointment.start_time,
+          end_time: appointment.end_time,
+          duration: durationInMinutes + ' minutes'
+        },
+        new: {
+          start_time: startTimeUTC,
+          end_time: endTimeUTC
+        }
+      });
+
+      const { data, error } = await supabase
         .from('appointments')
         .update({
-          start_time: newStartDate.toISOString(),
-          end_time: newEndDate.toISOString()
+          start_time: startTimeUTC,
+          end_time: endTimeUTC
         })
         .eq('id', appointment.id)
+        .select();
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error details:', {
+          error,
+          appointment: appointment.id,
+          start_time: startTimeUTC,
+          end_time: endTimeUTC
+        });
+        throw error;
+      }
 
-      toast.success('Rendez-vous déplacé avec succès')
-      fetchAppointments()
+      console.log('Update successful:', data);
+      toast.success('Rendez-vous déplacé avec succès');
+      fetchAppointments();
     } catch (error) {
-      console.error('Error updating appointment:', error)
-      toast.error('Erreur lors du déplacement du rendez-vous')
-      arg.revert()
+      console.error('Error updating appointment:', error);
+      toast.error('Erreur lors du déplacement du rendez-vous');
+      arg.revert();
     }
   }
 
@@ -184,7 +219,11 @@ export default function AppointmentCalendar() {
             setIsFormOpen(false)
             setSelectedAppointment(null)
           }}
-          onSuccess={fetchAppointments}
+          onSuccess={() => {
+            setIsFormOpen(false)
+            setSelectedAppointment(null)
+            fetchAppointments()
+          }}
           onDelete={handleDeleteAppointment}
         />
       )}

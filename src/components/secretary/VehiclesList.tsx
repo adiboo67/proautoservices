@@ -31,6 +31,8 @@ export default function VehiclesList() {
         .from('vehicles')
         .select('*')
         .order('entry_date', { ascending: false })
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
 
       if (vehiclesError) throw vehiclesError
 

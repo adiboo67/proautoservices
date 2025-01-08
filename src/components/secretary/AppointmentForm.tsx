@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useRouter } from 'next/router'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'react-toastify'
-import { useRouter } from 'next/router'
 
 interface AppointmentFormProps {
   appointment?: any
@@ -17,13 +17,14 @@ const SERVICES = [
   'Réparation',
   'Dépannage',
   'Diagnostic',
-  'Pneumatique',
-  'Climatisation',
+  'Entretien',
   'Autres'
 ]
 
 export default function AppointmentForm({ appointment, selectedDate, onClose, onSuccess, onDelete }: AppointmentFormProps) {
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
+
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: appointment ? {
       client_name: appointment.client_name,
@@ -38,7 +39,6 @@ export default function AppointmentForm({ appointment, selectedDate, onClose, on
       service: 'Vidange'
     }
   })
-  const router = useRouter()
 
   const onSubmit = async (data: any) => {
     try {
@@ -59,7 +59,7 @@ export default function AppointmentForm({ appointment, selectedDate, onClose, on
         notes: data.notes || null
       }
 
-      if (appointment?.id) {
+      if (appointment) {
         // Update
         const { error } = await supabase
           .from('appointments')
@@ -67,7 +67,6 @@ export default function AppointmentForm({ appointment, selectedDate, onClose, on
           .eq('id', appointment.id)
 
         if (error) throw error
-        toast.success('Rendez-vous mis à jour avec succès')
       } else {
         // Create
         const { error } = await supabase
@@ -75,81 +74,63 @@ export default function AppointmentForm({ appointment, selectedDate, onClose, on
           .insert([appointmentData])
 
         if (error) throw error
-        toast.success('Rendez-vous créé avec succès')
       }
 
+      toast.success(appointment ? 'Rendez-vous modifié' : 'Rendez-vous créé')
       onSuccess()
-      onClose()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error saving appointment:', error)
-      toast.error(error.message || 'Erreur lors de l\'enregistrement')
+      toast.error('Erreur lors de l\'enregistrement du rendez-vous')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-gray-900">
-            {appointment ? 'Modifier le rendez-vous' : 'Nouveau rendez-vous'}
-          </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-500"
-          >
-            <span className="sr-only">Fermer</span>
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <h2 className="text-lg font-medium mb-4">
+          {appointment ? 'Modifier le rendez-vous' : 'Nouveau rendez-vous'}
+        </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label htmlFor="client_name" className="block text-sm font-medium text-gray-700">Nom du client</label>
+            <label htmlFor="client_name" className="block text-sm font-medium text-gray-700">
+              Nom du client
+            </label>
             <input
+              type="text"
               id="client_name"
-              type="text"
-              {...register('client_name', { required: 'Ce champ est requis' })}
+              {...register('client_name', { required: true })}
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2"
             />
-            {errors.client_name && (
-              <p className="mt-1 text-sm text-red-600">{String(errors.client_name.message || '')}</p>
-            )}
+            {errors.client_name && <span className="text-red-500 text-sm">Ce champ est requis</span>}
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Téléphone</label>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+              Téléphone
+            </label>
             <input
-              id="phone"
               type="tel"
-              {...register('phone', {
-                required: 'Ce champ est requis',
-                pattern: {
-                  value: /^[0-9+\s-]+$/,
-                  message: 'Numéro de téléphone invalide'
-                }
-              })}
+              id="phone"
+              {...register('phone', { required: true })}
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2"
             />
-            {errors.phone && (
-              <p className="mt-1 text-sm text-red-600">{String(errors.phone.message || '')}</p>
-            )}
+            {errors.phone && <span className="text-red-500 text-sm">Ce champ est requis</span>}
           </div>
 
           <div>
-            <label htmlFor="vehicle" className="block text-sm font-medium text-gray-700">Véhicule</label>
+            <label htmlFor="vehicle" className="block text-sm font-medium text-gray-700">
+              Véhicule
+            </label>
             <input
-              id="vehicle"
               type="text"
-              {...register('vehicle', { required: 'Ce champ est requis' })}
+              id="vehicle"
+              {...register('vehicle', { required: true })}
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2"
             />
-            {errors.vehicle && (
-              <p className="mt-1 text-sm text-red-600">{String(errors.vehicle.message || '')}</p>
-            )}
+            {errors.vehicle && <span className="text-red-500 text-sm">Ce champ est requis</span>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -181,19 +162,14 @@ export default function AppointmentForm({ appointment, selectedDate, onClose, on
           </div>
 
           <div>
-            <label htmlFor="service" className="block text-sm font-medium text-gray-700">Service</label>
-            <select
+            <label htmlFor="service" className="block text-sm font-medium text-gray-700">Type de travaux</label>
+            <textarea
               id="service"
-              {...register('service', { required: 'Ce champ est requis' })}
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2"
-            >
-              {SERVICES.map(service => (
-                <option key={service} value={service}>{service}</option>
-              ))}
-            </select>
-            {errors.service && (
-              <p className="mt-1 text-sm text-red-600">{String(errors.service.message || '')}</p>
-            )}
+              {...register('service', { required: true })}
+              rows={6}
+              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 min-h-[200px]"
+            />
+            {errors.service && <span className="text-red-500 text-sm">Ce champ est requis</span>}
           </div>
 
           <div>

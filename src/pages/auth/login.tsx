@@ -83,6 +83,13 @@ export default function Login() {
     <Layout title="Connexion - ProAutoServices">
       <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="flex justify-center">
+            <img
+              src="/images/mechanic-duck.png.png"
+              alt="ProAutoServices Logo"
+              className="h-24 w-auto"
+            />
+          </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Connexion à votre compte
           </h2>
