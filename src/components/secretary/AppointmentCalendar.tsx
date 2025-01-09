@@ -105,10 +105,15 @@ export default function AppointmentCalendar() {
       // Mettre à jour le selectedAppointment avec les nouvelles dates
       if (selectedAppointment?.id === appointment.id) {
         setSelectedAppointment({
-          ...selectedAppointment,
+          id: selectedAppointment.id,
+          title: selectedAppointment.title,
+          client_name: selectedAppointment.client_name,
+          phone: selectedAppointment.phone,
+          vehicle: selectedAppointment.vehicle,
+          service: selectedAppointment.service,
+          notes: selectedAppointment.notes,
           start_time: startTimeUTC,
-          end_time: endTimeUTC,
-          start: startTimeUTC,
+          end_time: endTimeUTC
         });
       }
 

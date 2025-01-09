@@ -56,7 +56,7 @@ export default function AppointmentForm({ appointment, selectedDate, onClose, on
       setLoading(true)
 
       // Utiliser la date sélectionnée ou la date existante du rendez-vous
-      const startDateTime = appointment ? new Date(appointment.start_time) : selectedDate
+      const startDateTime = appointment ? new Date(appointment.start_time) : (selectedDate || new Date())
       const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000) // +1 heure
 
       // Préparer les données selon le schéma de la table

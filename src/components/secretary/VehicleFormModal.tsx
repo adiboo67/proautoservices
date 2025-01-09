@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'react-toastify'
 import PhotoUpload from '@/components/secretary/PhotoUpload'
-import SignaturePad from 'react-signature-canvas'
+import SignatureCanvas from 'react-signature-canvas'
 
 interface VehicleFormModalProps {
   isOpen: boolean
@@ -36,7 +36,7 @@ export default function VehicleFormModal({ isOpen, onClose, appointment }: Vehic
   const [loading, setLoading] = useState(false)
   const [photos, setPhotos] = useState<string[]>(['', '', '', ''])
   const [signatureURL, setSignatureURL] = useState<string>('')
-  const [signaturePad, setSignaturePad] = useState<SignaturePad | null>(null)
+  const [signaturePad, setSignaturePad] = useState<SignatureCanvas | null>(null)
   const [mechanics, setMechanics] = useState<Mechanic[]>([])
 
   const { register, handleSubmit, formState: { errors } } = useForm<VehicleFormData>({
@@ -369,18 +369,18 @@ export default function VehicleFormModal({ isOpen, onClose, appointment }: Vehic
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Signature du client</label>
-            <div className="border-2 border-gray-300 rounded-md p-2">
-              <SignaturePad
+            <div className="border-2 border-gray-300 rounded-md">
+              <SignatureCanvas
                 ref={(ref) => setSignaturePad(ref)}
                 canvasProps={{
-                  className: 'signature-canvas w-full h-40 border border-gray-200',
-                  style: { width: '100%', height: '160px' }
+                  className: 'signature-canvas',
+                  style: { width: '100%', height: '160px' },
+                  width: 500,
+                  height: 160
                 }}
-                options={{
-                  minWidth: 1,
-                  maxWidth: 2.5,
-                  velocityFilterWeight: 0.7
-                }}
+                minWidth={1}
+                maxWidth={2.5}
+                velocityFilterWeight={0.7}
               />
               <div className="mt-2 flex justify-end space-x-2">
                 <button
