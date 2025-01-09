@@ -11,6 +11,7 @@ type RegisterForm = {
   confirmPassword: string
   role: 'secretary' | 'mechanic'
   fullName: string
+  parts_supplies: string
 }
 
 export default function Register() {
@@ -60,6 +61,7 @@ export default function Register() {
             email: data.email,
             full_name: data.fullName,
             role: data.role,
+            parts_supplies: data.parts_supplies,
           }
         ])
 
@@ -133,6 +135,23 @@ export default function Register() {
             </select>
             {errors.role && (
               <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="parts_supplies" className="block text-sm font-medium text-gray-700">
+            Pièces et fournitures
+          </label>
+          <div className="mt-1">
+            <input
+              id="parts_supplies"
+              type="text"
+              {...register('parts_supplies', { required: 'Pièces et fournitures requises' })}
+              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+            {errors.parts_supplies && (
+              <p className="mt-1 text-sm text-red-600">{errors.parts_supplies.message}</p>
             )}
           </div>
         </div>

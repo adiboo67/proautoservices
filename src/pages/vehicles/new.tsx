@@ -20,7 +20,8 @@ export default function NewVehicle() {
       brand_model: brand_model as string || '',
       work_type: work_type as string || '',
       entry_date: entry_date as string || new Date().toISOString().split('T')[0],
-      status: 'En attente'
+      status: 'En attente',
+      parts_supplies: ''
     }
   })
 
