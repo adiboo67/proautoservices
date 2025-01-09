@@ -31,6 +31,16 @@
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/auth/login.js"
+    ],
+    "/mechanic/dashboard": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/mechanic/dashboard.js"
+    ],
+    "/secretary/dashboard": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/secretary/dashboard.js"
     ]
   },
   "ampFirstPages": []

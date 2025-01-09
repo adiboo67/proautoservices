@@ -81,36 +81,15 @@ export default function AppointmentCalendar() {
       const originalEnd = new Date(appointment.end_time);
       const durationInMinutes = (originalEnd.getTime() - originalStart.getTime()) / (1000 * 60);
 
-      // Créer la nouvelle date de début
+      // Créer la nouvelle date de début avec la nouvelle heure
       const newStartDate = new Date(arg.event.start);
-
-      // Conserver l'heure d'origine
-      newStartDate.setHours(
-        originalStart.getHours(),
-        originalStart.getMinutes(),
-        0,
-        0
-      );
-
-      // Calculer la nouvelle date de fin en conservant la durée originale
+      
+      // Calculer la nouvelle date de fin en ajoutant la durée originale
       const newEndDate = new Date(newStartDate.getTime() + durationInMinutes * 60 * 1000);
 
       // S'assurer que les dates sont au format UTC
       const startTimeUTC = newStartDate.toISOString();
       const endTimeUTC = newEndDate.toISOString();
-
-      console.log('Updating appointment:', {
-        id: appointment.id,
-        original: {
-          start_time: appointment.start_time,
-          end_time: appointment.end_time,
-          duration: durationInMinutes + ' minutes'
-        },
-        new: {
-          start_time: startTimeUTC,
-          end_time: endTimeUTC
-        }
-      });
 
       const { data, error } = await supabase
         .from('appointments')
@@ -121,19 +100,20 @@ export default function AppointmentCalendar() {
         .eq('id', appointment.id)
         .select();
 
-      if (error) {
-        console.error('Supabase error details:', {
-          error,
-          appointment: appointment.id,
+      if (error) throw error;
+
+      // Mettre à jour le selectedAppointment avec les nouvelles dates
+      if (selectedAppointment?.id === appointment.id) {
+        setSelectedAppointment({
+          ...selectedAppointment,
           start_time: startTimeUTC,
-          end_time: endTimeUTC
+          end_time: endTimeUTC,
+          start: startTimeUTC,
         });
-        throw error;
       }
 
-      console.log('Update successful:', data);
       toast.success('Rendez-vous déplacé avec succès');
-      fetchAppointments();
+      await fetchAppointments();
     } catch (error) {
       console.error('Error updating appointment:', error);
       toast.error('Erreur lors du déplacement du rendez-vous');
